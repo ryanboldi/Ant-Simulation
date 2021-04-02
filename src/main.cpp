@@ -17,53 +17,63 @@ bool loadMedia();
 void close();
 
 //Loads individual image as texture
-SDL_Texture* loadTexture(std::string path);
+SDL_Texture *loadTexture(std::string path);
 
 //the window we will be rendering to
-SDL_Window* gWindow = NULL;
+SDL_Window *gWindow = NULL;
 
 //the window renderer
-SDL_Renderer* gRenderer = NULL;
+SDL_Renderer *gRenderer = NULL;
 
 //current displayed texture
-SDL_Texture* gTexture = NULL;
+SDL_Texture *gTexture = NULL;
 
-
-bool init(){
+bool init()
+{
     //Init flag
     bool success = true;
 
-     //Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0){
+    //Initialize SDL
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         success = false;
-    } else {
+    }
+    else
+    {
         //set texture filtering to linear
-        if (!SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "1")){
+        if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
+        {
             printf("Warning: Linear texture filtering not enabled!");
         }
 
         //create window
         gWindow = SDL_CreateWindow("Ant-Simulation", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 
-        if (gWindow == NULL){
+        if (gWindow == NULL)
+        {
             printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
             success = false;
-        } else {
+        }
+        else
+        {
 
             //create a renderer for window
             gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
-            if(gRenderer == NULL){
+            if (gRenderer == NULL)
+            {
                 printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
                 success = false;
             }
-            else {
+            else
+            {
                 //initialize renderer color
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
                 //initialize PNG loading
                 int imgFlags = IMG_INIT_PNG;
-                if(!(IMG_Init(imgFlags) & imgFlags)){
+                if (!(IMG_Init(imgFlags) & imgFlags))
+                {
                     printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
                 }
             }
@@ -72,7 +82,8 @@ bool init(){
     return success;
 }
 
-bool loadMedia(){
+bool loadMedia()
+{
     //loading success flag
     bool success = true;
 
@@ -80,13 +91,14 @@ bool loadMedia(){
     //gTexture = loadTexture("assets/ant.png");
     //if(gTexture == NULL)
     //{
-     //   printf("Failed to load texture image!\n");
-     //   success = false;
+    //   printf("Failed to load texture image!\n");
+    //   success = false;
     //}
     return success;
 }
 
-void close(){
+void close()
+{
     //Free the loaded image
     SDL_DestroyTexture(gTexture);
     gTexture = NULL;
@@ -102,18 +114,23 @@ void close(){
     SDL_Quit();
 }
 
-SDL_Texture* loadTexture(std::string path){
+SDL_Texture *loadTexture(std::string path)
+{
     //the final texture
-    SDL_Texture* newTexture = NULL;
+    SDL_Texture *newTexture = NULL;
 
     //load image at specified path
-    SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-    if (loadedSurface == NULL){
+    SDL_Surface *loadedSurface = IMG_Load(path.c_str());
+    if (loadedSurface == NULL)
+    {
         printf("Unable to load image %s! SDL_image error: %s\n", path.c_str(), IMG_GetError());
-    } else {
+    }
+    else
+    {
         //create texture from surface pixels
         newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
-        if(newTexture == NULL){
+        if (newTexture == NULL)
+        {
             printf("Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
         }
 
@@ -123,15 +140,21 @@ SDL_Texture* loadTexture(std::string path){
     return newTexture;
 }
 
-
-int main(int argc, char* args[]){
-    if (!init()){
+int main(int argc, char *args[])
+{
+    if (!init())
+    {
         printf("Failed to initialize!\n");
-    } else {
+    }
+    else
+    {
         //load media
-        if(!loadMedia()){
+        if (!loadMedia())
+        {
             printf("Failed to load media!\n");
-        } else {
+        }
+        else
+        {
             //Main loop flag
             bool quit = false;
 
@@ -139,11 +162,14 @@ int main(int argc, char* args[]){
             SDL_Event e;
 
             //While application is running
-            while(!quit){
+            while (!quit)
+            {
                 //handle events on queue
-                while(SDL_PollEvent(&e) != 0){
+                while (SDL_PollEvent(&e) != 0)
+                {
                     //user requests quit
-                    if(e.type == SDL_QUIT){
+                    if (e.type == SDL_QUIT)
+                    {
                         quit = true;
                     }
                 }
@@ -154,22 +180,23 @@ int main(int argc, char* args[]){
 
                 //Render red filled quad
                 //struct
-                SDL_Rect fillRect = {SCREEN_WIDTH/4, SCREEN_HEIGHT/4, SCREEN_WIDTH/2, SCREEN_HEIGHT/2};
+                SDL_Rect fillRect = {SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
                 SDL_RenderFillRect(gRenderer, &fillRect);
 
                 //Render green outlined quad
-                SDL_Rect outlineRect = {SCREEN_WIDTH/6, SCREEN_HEIGHT/6, SCREEN_WIDTH * 2 /3, SCREEN_HEIGHT * 2/3};
+                SDL_Rect outlineRect = {SCREEN_WIDTH / 6, SCREEN_HEIGHT / 6, SCREEN_WIDTH * 2 / 3, SCREEN_HEIGHT * 2 / 3};
                 SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0x00, 0xFF);
                 SDL_RenderDrawRect(gRenderer, &outlineRect);
 
                 //Draw blue horizontal line
                 SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-                SDL_RenderDrawLine(gRenderer, 0, SCREEN_HEIGHT /2, SCREEN_WIDTH, SCREEN_HEIGHT/2);
+                SDL_RenderDrawLine(gRenderer, 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
 
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0xFF);
-                for(int i = 0; i < SCREEN_HEIGHT; i+= 4){
-                    SDL_RenderDrawPoint(gRenderer, SCREEN_WIDTH/2, i);
+                for (int i = 0; i < SCREEN_HEIGHT; i += 4)
+                {
+                    SDL_RenderDrawPoint(gRenderer, SCREEN_WIDTH / 2, i);
                 }
 
                 //render texture to screen
