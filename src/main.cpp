@@ -7,6 +7,38 @@
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
+//texture wrapper class
+class LTexture
+{
+public:
+    //initializes variables
+    LTexture();
+
+    //Deallocates memory
+    ~LTexture();
+
+    //loads image at specified path
+    bool loadFromFile(std::string path);
+
+    //deallocate texture
+    void free();
+
+    //renders texture at given point
+    void render(int x, int y);
+
+    //get image dimensions
+    int getWidth();
+    int getHeight();
+
+private:
+    //the actual hardware texture
+    SDL_Texture *mTexture;
+
+    //Image dimensions
+    int mWidth;
+    int mHeight;
+};
+
 //starts up SDL and create the window
 bool init();
 
@@ -25,8 +57,94 @@ SDL_Window *gWindow = NULL;
 //the window renderer
 SDL_Renderer *gRenderer = NULL;
 
-//current displayed texture
-SDL_Texture *gTexture = NULL;
+//Scene textures
+LTexture gAntTexture;
+LTexture gBackgroundTexture;
+
+LTexture::LTexture()
+{
+    //initialize
+    mTexture = NULL;
+    mWidth = 0;
+    mHeight = 0;
+}
+
+LTexture::~LTexture()
+{
+    //deallocate
+    free();
+}
+
+bool LTexture::loadFromFile(std::string path)
+{
+    //get rid of preexisting texture
+    free();
+
+    //the final texture
+    SDL_Texture *newTexture = NULL;
+
+    //load image at specified path
+    SDL_Surface *loadedSurface = IMG_Load(path.c_str());
+    if (loadedSurface == NULL)
+    {
+        printf("Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError());
+    }
+    else
+    {
+
+        //color key the image
+        //SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGBA(loadedSurface->format, 0xFF, 0xFF, 0xFF));
+
+        //create new texture from surface pixels
+        newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
+        if (newTexture == NULL)
+        {
+            printf("Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
+        }
+        else
+        {
+            //get image dimensions
+            mWidth = loadedSurface->w;
+            mHeight = loadedSurface->h;
+        }
+
+        //get rid of old loaded surface
+        SDL_FreeSurface(loadedSurface);
+    }
+
+    //return success
+    mTexture = newTexture;
+    return mTexture != NULL;
+}
+
+void LTexture::free()
+{
+    //free texture if it exists
+    if (mTexture != NULL)
+    {
+        SDL_DestroyTexture(mTexture);
+        mTexture = NULL;
+        mWidth = 0;
+        mHeight = 0;
+    }
+}
+
+void LTexture::render(int x, int y)
+{
+    //set rendering sapce and render to screen
+    SDL_Rect renderQuad = {x, y, mWidth, mHeight};
+    SDL_RenderCopy(gRenderer, mTexture, NULL, &renderQuad);
+}
+
+int LTexture::getWidth()
+{
+    return mWidth;
+}
+
+int LTexture::getHeight()
+{
+    return mHeight;
+}
 
 bool init()
 {
@@ -87,21 +205,28 @@ bool loadMedia()
     //loading success flag
     bool success = true;
 
-    //load PNG Texture
-    //gTexture = loadTexture("assets/ant.png");
-    //if(gTexture == NULL)
-    //{
-    //   printf("Failed to load texture image!\n");
-    //   success = false;
-    //}
+    //load Ant Texture
+    if (!gAntTexture.loadFromFile("assets/ant/ant1.png"))
+    {
+        printf("Failed to load ant Image! \n");
+        success = false;
+    }
+
+    if (!gBackgroundTexture.loadFromFile("assets/background.png"))
+    {
+        printf("Failed to load background Image! \n");
+        success = false;
+    }
+
     return success;
 }
 
 void close()
 {
-    //Free the loaded image
-    SDL_DestroyTexture(gTexture);
-    gTexture = NULL;
+
+    //free loaded images
+    gAntTexture.free();
+    gBackgroundTexture.free();
 
     //Destroy window
     SDL_DestroyRenderer(gRenderer);
@@ -112,32 +237,6 @@ void close()
     //quit SDL Subsystems
     IMG_Quit();
     SDL_Quit();
-}
-
-SDL_Texture *loadTexture(std::string path)
-{
-    //the final texture
-    SDL_Texture *newTexture = NULL;
-
-    //load image at specified path
-    SDL_Surface *loadedSurface = IMG_Load(path.c_str());
-    if (loadedSurface == NULL)
-    {
-        printf("Unable to load image %s! SDL_image error: %s\n", path.c_str(), IMG_GetError());
-    }
-    else
-    {
-        //create texture from surface pixels
-        newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
-        if (newTexture == NULL)
-        {
-            printf("Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
-        }
-
-        //get rid of the old loaded surface
-        SDL_FreeSurface(loadedSurface);
-    }
-    return newTexture;
 }
 
 int main(int argc, char *args[])
@@ -178,29 +277,9 @@ int main(int argc, char *args[])
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
                 SDL_RenderClear(gRenderer);
 
-                //Render red filled quad
-                //struct
-                SDL_Rect fillRect = {SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
-                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
-                SDL_RenderFillRect(gRenderer, &fillRect);
+                gBackgroundTexture.render(0, 0);
 
-                //Render green outlined quad
-                SDL_Rect outlineRect = {SCREEN_WIDTH / 6, SCREEN_HEIGHT / 6, SCREEN_WIDTH * 2 / 3, SCREEN_HEIGHT * 2 / 3};
-                SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0x00, 0xFF);
-                SDL_RenderDrawRect(gRenderer, &outlineRect);
-
-                //Draw blue horizontal line
-                SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
-                SDL_RenderDrawLine(gRenderer, 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
-
-                SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0x00, 0xFF);
-                for (int i = 0; i < SCREEN_HEIGHT; i += 4)
-                {
-                    SDL_RenderDrawPoint(gRenderer, SCREEN_WIDTH / 2, i);
-                }
-
-                //render texture to screen
-                //SDL_RenderCopy(gRenderer, gTexture, NULL, NULL);
+                gAntTexture.render(240, 190);
 
                 //Update screen
                 SDL_RenderPresent(gRenderer);
