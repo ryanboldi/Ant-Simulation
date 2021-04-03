@@ -24,7 +24,7 @@ public:
     void free();
 
     //renders texture at given point
-    void render(int x, int y);
+    void render(int x, int y, int scale);
 
     //get image dimensions
     int getWidth();
@@ -129,10 +129,10 @@ void LTexture::free()
     }
 }
 
-void LTexture::render(int x, int y)
+void LTexture::render(int x, int y, int scale = 1)
 {
     //set rendering sapce and render to screen
-    SDL_Rect renderQuad = {x, y, mWidth, mHeight};
+    SDL_Rect renderQuad = {x, y, mWidth / scale, mHeight / scale};
     SDL_RenderCopy(gRenderer, mTexture, NULL, &renderQuad);
 }
 
@@ -279,7 +279,7 @@ int main(int argc, char *args[])
 
                 gBackgroundTexture.render(0, 0);
 
-                gAntTexture.render(240, 190);
+                gAntTexture.render(240, 190, 2);
 
                 //Update screen
                 SDL_RenderPresent(gRenderer);
