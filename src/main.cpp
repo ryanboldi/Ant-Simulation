@@ -24,7 +24,7 @@ public:
     void free();
 
     //renders texture at given point
-    void render(int x, int y, int scale);
+    void render(int x, int y, int scale = 1, SDL_Rect *clip = NULL);
 
     //get image dimensions
     int getWidth();
@@ -60,6 +60,10 @@ SDL_Renderer *gRenderer = NULL;
 //Scene textures
 LTexture gAntTexture;
 LTexture gBackgroundTexture;
+
+//scene sprites
+SDL_Rect gSpriteClips[4];
+LTexture gSpriteSheetTexture;
 
 LTexture::LTexture()
 {
@@ -129,11 +133,20 @@ void LTexture::free()
     }
 }
 
-void LTexture::render(int x, int y, int scale = 1)
+void LTexture::render(int x, int y, int scale, SDL_Rect *clip)
 {
+
     //set rendering sapce and render to screen
     SDL_Rect renderQuad = {x, y, mWidth / scale, mHeight / scale};
-    SDL_RenderCopy(gRenderer, mTexture, NULL, &renderQuad);
+
+    //set clip rendering dimensions
+    if (clip != NULL)
+    {
+        renderQuad.w = clip->w;
+        renderQuad.h = clip->h;
+    }
+
+    SDL_RenderCopy(gRenderer, mTexture, clip, &renderQuad);
 }
 
 int LTexture::getWidth()
@@ -206,10 +219,36 @@ bool loadMedia()
     bool success = true;
 
     //load Ant Texture
-    if (!gAntTexture.loadFromFile("assets/ant/ant1.png"))
+    if (!gSpriteSheetTexture.loadFromFile("assets/ant/ant-walk.png"))
     {
         printf("Failed to load ant Image! \n");
         success = false;
+    }
+    else
+    {
+        //set ant 1
+        gSpriteClips[0].x = 0;
+        gSpriteClips[0].y = 0;
+        gSpriteClips[0].w = 64;
+        gSpriteClips[0].h = 64;
+
+        //set ant 2
+        gSpriteClips[1].x = 64;
+        gSpriteClips[1].y = 0;
+        gSpriteClips[1].w = 64;
+        gSpriteClips[1].h = 64;
+
+        //set ant 3
+        gSpriteClips[2].x = 128;
+        gSpriteClips[2].y = 0;
+        gSpriteClips[2].w = 64;
+        gSpriteClips[2].h = 64;
+
+        //set ant 5
+        gSpriteClips[3].x = 192;
+        gSpriteClips[3].y = 0;
+        gSpriteClips[3].w = 64;
+        gSpriteClips[3].h = 64;
     }
 
     if (!gBackgroundTexture.loadFromFile("assets/background.png"))
@@ -279,7 +318,16 @@ int main(int argc, char *args[])
 
                 gBackgroundTexture.render(0, 0);
 
-                gAntTexture.render(240, 190, 2);
+                //render ants in different corners of screen
+                gSpriteSheetTexture.render(0, 0, 1, &gSpriteClips[0]);
+
+                gSpriteSheetTexture.render(SCREEN_WIDTH - gSpriteClips[1].w, 0, 1, &gSpriteClips[1]);
+
+                gSpriteSheetTexture.render(0, SCREEN_HEIGHT - gSpriteClips[2].h, 1, &gSpriteClips[2]);
+
+                gSpriteSheetTexture.render(SCREEN_WIDTH - gSpriteClips[3].w, SCREEN_HEIGHT - gSpriteClips[3].h, 1, &gSpriteClips[1]);
+
+                //gAntTexture.render(240, 190, 2);
 
                 //Update screen
                 SDL_RenderPresent(gRenderer);
