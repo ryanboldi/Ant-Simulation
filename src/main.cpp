@@ -23,6 +23,12 @@ public:
     //set color modulation
     void setColor(Uint8 red, Uint8 green, Uint8 blue);
 
+    //set blending
+    void setBlendMode(SDL_BlendMode blending);
+
+    //set alpha modulation
+    void setAlpha(Uint8 alpha);
+
     //deallocate texture
     void free();
 
@@ -128,6 +134,17 @@ void LTexture::setColor(Uint8 red, Uint8 green, Uint8 blue)
 {
     //modulate texture
     SDL_SetTextureColorMod(mTexture, red, green, blue);
+}
+
+void LTexture::setBlendMode(SDL_BlendMode blending)
+{
+    SDL_SetTextureBlendMode(mTexture, blending);
+}
+
+void LTexture::setAlpha(Uint8 alpha)
+{
+    //modulate the texture's alpha
+    SDL_SetTextureAlphaMod(mTexture, alpha);
 }
 
 void LTexture::free()
@@ -258,6 +275,8 @@ bool loadMedia()
         gSpriteClips[3].y = 0;
         gSpriteClips[3].w = 64;
         gSpriteClips[3].h = 64;
+
+        gSpriteSheetTexture.setBlendMode(SDL_BLENDMODE_BLEND);
     }
 
     if (!gBackgroundTexture.loadFromFile("assets/background.png"))
@@ -313,6 +332,9 @@ int main(int argc, char *args[])
             Uint8 g = 255;
             Uint8 b = 255;
 
+            //alpha modulation component
+            Uint8 a = 255;
+
             //While application is running
             while (!quit)
             {
@@ -327,27 +349,32 @@ int main(int argc, char *args[])
                     //on keypress change the rgb values
                     else if (e.type == SDL_KEYDOWN)
                     {
-                        switch (e.key.keysym.sym)
+                        if (e.key.keysym.sym == SDLK_w)
                         {
-                        //increase red
-                        case SDLK_q:
-                            r += 32;
-                            break;
-                        case SDLK_w:
-                            g += 32;
-                            break;
-                        case SDLK_e:
-                            b += 32;
-                            break;
-                        case SDLK_a:
-                            r -= 32;
-                            break;
-                        case SDLK_s:
-                            g -= 32;
-                            break;
-                        case SDLK_d:
-                            b -= 32;
-                            break;
+                            //cap if over 255
+                            if (a + 32 > 255)
+                            {
+                                a = 255;
+                            }
+                            //incrememnt otherwise
+                            else
+                            {
+                                a += 32;
+                            }
+                        }
+
+                        else if (e.key.keysym.sym == SDLK_s)
+                        {
+                            //cap if below 0
+                            if (a - 32 < 0)
+                            {
+                                a = 0;
+                            }
+                            //decrement otherwise
+                            else
+                            {
+                                a -= 32;
+                            }
                         }
                     }
                 }
@@ -356,8 +383,12 @@ int main(int argc, char *args[])
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
                 SDL_RenderClear(gRenderer);
 
-                gBackgroundTexture.setColor(r, g, b);
+                //modulate the texture's color a bit
+                //gBackgroundTexture.setColor(0, 0, 0);
                 gBackgroundTexture.render(0, 0);
+
+                //set all the ants to have an alpha that we can modulate
+                gSpriteSheetTexture.setAlpha(a);
 
                 //render ants in different corners of screen
                 gSpriteSheetTexture.render(0, 0, 1, &gSpriteClips[0]);
