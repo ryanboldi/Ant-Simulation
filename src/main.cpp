@@ -71,7 +71,8 @@ LTexture gAntTexture;
 LTexture gBackgroundTexture;
 
 //scene sprites
-SDL_Rect gSpriteClips[4];
+const int antWalkFrames = 4;
+SDL_Rect gSpriteClips[antWalkFrames];
 LTexture gSpriteSheetTexture;
 
 LTexture::LTexture()
@@ -215,8 +216,8 @@ bool init()
         else
         {
 
-            //create a renderer for window
-            gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
+            //create a vsync renderer for window
+            gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
             if (gRenderer == NULL)
             {
                 printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
@@ -327,6 +328,9 @@ int main(int argc, char *args[])
             //SDL event handler
             SDL_Event e;
 
+            //current animation frame
+            int frame = 0;
+
             //Color modulation components
             Uint8 r = 255;
             Uint8 g = 255;
@@ -390,19 +394,21 @@ int main(int argc, char *args[])
                 //set all the ants to have an alpha that we can modulate
                 gSpriteSheetTexture.setAlpha(a);
 
-                //render ants in different corners of screen
-                gSpriteSheetTexture.render(0, 0, 1, &gSpriteClips[0]);
+                //render the current frame
+                SDL_Rect *currentClip = &gSpriteClips[frame / 4];
+                gSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, 1, currentClip);
 
-                gSpriteSheetTexture.render(SCREEN_WIDTH - gSpriteClips[1].w, 0, 1, &gSpriteClips[1]);
-
-                gSpriteSheetTexture.render(0, SCREEN_HEIGHT - gSpriteClips[2].h, 1, &gSpriteClips[2]);
-
-                gSpriteSheetTexture.render(SCREEN_WIDTH - gSpriteClips[3].w, SCREEN_HEIGHT - gSpriteClips[3].h, 1, &gSpriteClips[1]);
-
-                //gAntTexture.render(240, 190, 2);
-
-                //Update screen
+                //update screen
                 SDL_RenderPresent(gRenderer);
+
+                //go to next frame
+                ++frame;
+
+                //cycle the animation
+                if (frame / 4 >= antWalkFrames)
+                {
+                    frame = 0;
+                }
             }
         }
     }
