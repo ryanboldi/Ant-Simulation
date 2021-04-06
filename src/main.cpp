@@ -20,6 +20,9 @@ public:
     //loads image at specified path
     bool loadFromFile(std::string path);
 
+    //set color modulation
+    void setColor(Uint8 red, Uint8 green, Uint8 blue);
+
     //deallocate texture
     void free();
 
@@ -119,6 +122,12 @@ bool LTexture::loadFromFile(std::string path)
     //return success
     mTexture = newTexture;
     return mTexture != NULL;
+}
+
+void LTexture::setColor(Uint8 red, Uint8 green, Uint8 blue)
+{
+    //modulate texture
+    SDL_SetTextureColorMod(mTexture, red, green, blue);
 }
 
 void LTexture::free()
@@ -299,6 +308,11 @@ int main(int argc, char *args[])
             //SDL event handler
             SDL_Event e;
 
+            //Color modulation components
+            Uint8 r = 255;
+            Uint8 g = 255;
+            Uint8 b = 255;
+
             //While application is running
             while (!quit)
             {
@@ -310,12 +324,39 @@ int main(int argc, char *args[])
                     {
                         quit = true;
                     }
+                    //on keypress change the rgb values
+                    else if (e.type == SDL_KEYDOWN)
+                    {
+                        switch (e.key.keysym.sym)
+                        {
+                        //increase red
+                        case SDLK_q:
+                            r += 32;
+                            break;
+                        case SDLK_w:
+                            g += 32;
+                            break;
+                        case SDLK_e:
+                            b += 32;
+                            break;
+                        case SDLK_a:
+                            r -= 32;
+                            break;
+                        case SDLK_s:
+                            g -= 32;
+                            break;
+                        case SDLK_d:
+                            b -= 32;
+                            break;
+                        }
+                    }
                 }
 
                 //Clear the screen
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
                 SDL_RenderClear(gRenderer);
 
+                gBackgroundTexture.setColor(r, g, b);
                 gBackgroundTexture.render(0, 0);
 
                 //render ants in different corners of screen
