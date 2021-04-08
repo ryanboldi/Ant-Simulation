@@ -1,7 +1,9 @@
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDl_ttf.h>
 #include <stdio.h>
 #include <string>
+#include <cmath>
 
 //screen dimension constants
 const int SCREEN_WIDTH = 640;
@@ -19,6 +21,9 @@ public:
 
     //loads image at specified path
     bool loadFromFile(std::string path);
+
+    //creates an image from font string
+    bool loadFromRenderedText(std::string textureText, SDL_Color textColor);
 
     //set color modulation
     void setColor(Uint8 red, Uint8 green, Uint8 blue);
@@ -66,7 +71,11 @@ SDL_Window *gWindow = NULL;
 //the window renderer
 SDL_Renderer *gRenderer = NULL;
 
+//the global font
+TTF_Font *gFont = NULL;
+
 //Scene textures
+LTexture gTextTexture;
 LTexture gAntTexture;
 LTexture gBackgroundTexture;
 
@@ -128,6 +137,40 @@ bool LTexture::loadFromFile(std::string path)
 
     //return success
     mTexture = newTexture;
+    return mTexture != NULL;
+}
+
+bool LTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor)
+{
+    //get rid of preexisting texture
+    free();
+
+    //Render text surface
+    SDL_Surface *textSurface = TTF_RenderText_Solid(gFont, textureText.c_str(), textColor);
+    if (textSurface == NULL)
+    {
+        printf("unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
+    }
+    else
+    {
+        //create texture from surface pixels
+        mTexture = SDL_CreateTextureFromSurface(gRenderer, textSurface);
+        if (mTexture == NULL)
+        {
+            printf("unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
+        }
+        else
+        {
+            //get image dimensions
+            mWidth = textSurface->w;
+            mHeight = textSurface->h;
+        }
+
+        //get rid of old surface
+        SDL_FreeSurface(textSurface);
+    }
+
+    //return success
     return mTexture != NULL;
 }
 
@@ -234,6 +277,13 @@ bool init()
                 {
                     printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
                 }
+
+                //initialize SDL_TTF
+                if (TTF_Init() == -1)
+                {
+                    printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
+                    success = false;
+                }
             }
         }
     }
@@ -244,6 +294,24 @@ bool loadMedia()
 {
     //loading success flag
     bool success = true;
+
+    //load text
+    gFont = TTF_OpenFont("assets/OpenSans-Regular.ttf", 28);
+    if (gFont == NULL)
+    {
+        printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
+        success = false;
+    }
+    else
+    {
+        //render the text
+        SDL_Color textColor = {0, 0, 0};
+        if (!gTextTexture.loadFromRenderedText("Ant ant ant ant", textColor))
+        {
+            printf("Failed to render text texutre!\n Ryan_Error 0001");
+            success = false;
+        }
+    }
 
     //load Ant Texture
     if (!gSpriteSheetTexture.loadFromFile("assets/ant/ant-walk.png"))
@@ -293,8 +361,13 @@ void close()
 {
 
     //free loaded images
+    gTextTexture.free();
     gAntTexture.free();
     gBackgroundTexture.free();
+
+    //free the global font
+    TTF_CloseFont(gFont);
+    gFont = NULL;
 
     //Destroy window
     SDL_DestroyRenderer(gRenderer);
@@ -303,6 +376,7 @@ void close()
     gRenderer = NULL;
 
     //quit SDL Subsystems
+    TTF_Quit();
     IMG_Quit();
     SDL_Quit();
 }
@@ -398,6 +472,9 @@ int main(int argc, char *args[])
                 //render the current frame
                 SDL_Rect *currentClip = &gSpriteClips[frame / 4];
                 gSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, currentClip, degrees, NULL, flipType);
+
+                //render text
+                gTextTexture.render((SCREEN_WIDTH - gTextTexture.getWidth()) / 2, (SCREEN_HEIGHT - gTextTexture.getHeight()) / 2);
 
                 //update screen
                 SDL_RenderPresent(gRenderer);
