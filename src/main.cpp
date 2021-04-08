@@ -33,7 +33,7 @@ public:
     void free();
 
     //renders texture at given point
-    void render(int x, int y, int scale = 1, SDL_Rect *clip = NULL);
+    void render(int x, int y, SDL_Rect *clip = NULL, double angle = 0.0, SDL_Point *center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
 
     //get image dimensions
     int getWidth();
@@ -160,11 +160,11 @@ void LTexture::free()
     }
 }
 
-void LTexture::render(int x, int y, int scale, SDL_Rect *clip)
+void LTexture::render(int x, int y, SDL_Rect *clip, double angle, SDL_Point *center, SDL_RendererFlip flip)
 {
 
     //set rendering sapce and render to screen
-    SDL_Rect renderQuad = {x, y, mWidth / scale, mHeight / scale};
+    SDL_Rect renderQuad = {x, y, mWidth, mHeight};
 
     //set clip rendering dimensions
     if (clip != NULL)
@@ -173,7 +173,7 @@ void LTexture::render(int x, int y, int scale, SDL_Rect *clip)
         renderQuad.h = clip->h;
     }
 
-    SDL_RenderCopy(gRenderer, mTexture, clip, &renderQuad);
+    SDL_RenderCopyEx(gRenderer, mTexture, clip, &renderQuad, angle, center, flip);
 }
 
 int LTexture::getWidth()
@@ -339,6 +339,12 @@ int main(int argc, char *args[])
             //alpha modulation component
             Uint8 a = 255;
 
+            //angle of rotation
+            double degrees = 0;
+
+            //flip type
+            SDL_RendererFlip flipType = SDL_FLIP_NONE;
+
             //While application is running
             while (!quit)
             {
@@ -353,32 +359,27 @@ int main(int argc, char *args[])
                     //on keypress change the rgb values
                     else if (e.type == SDL_KEYDOWN)
                     {
-                        if (e.key.keysym.sym == SDLK_w)
+                        switch (e.key.keysym.sym)
                         {
-                            //cap if over 255
-                            if (a + 32 > 255)
-                            {
-                                a = 255;
-                            }
-                            //incrememnt otherwise
-                            else
-                            {
-                                a += 32;
-                            }
-                        }
+                        case SDLK_a:
+                            degrees -= 60;
+                            break;
 
-                        else if (e.key.keysym.sym == SDLK_s)
-                        {
-                            //cap if below 0
-                            if (a - 32 < 0)
-                            {
-                                a = 0;
-                            }
-                            //decrement otherwise
-                            else
-                            {
-                                a -= 32;
-                            }
+                        case SDLK_d:
+                            degrees += 60;
+                            break;
+
+                        case SDLK_q:
+                            flipType = SDL_FLIP_HORIZONTAL;
+                            break;
+
+                        case SDLK_w:
+                            flipType = SDL_FLIP_NONE;
+                            break;
+
+                        case SDLK_e:
+                            flipType = SDL_FLIP_VERTICAL;
+                            break;
                         }
                     }
                 }
@@ -396,7 +397,7 @@ int main(int argc, char *args[])
 
                 //render the current frame
                 SDL_Rect *currentClip = &gSpriteClips[frame / 4];
-                gSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, 1, currentClip);
+                gSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, currentClip, degrees, NULL, flipType);
 
                 //update screen
                 SDL_RenderPresent(gRenderer);
