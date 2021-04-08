@@ -1,20 +1,6 @@
-class Ant
-{
-public:
-    // constructor
-    Ant();
-    ~Ant();
+#include "ant.h"
 
-private:
-    int x;
-    int y;
-};
-
-Ant::Ant()
-{
-    x = 0;
-    y = 0;
-}
+#define ANT_WALK_FRAMES 4
 
 Ant::~Ant()
 {
