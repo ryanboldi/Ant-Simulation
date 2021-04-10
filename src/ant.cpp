@@ -1,5 +1,8 @@
 #include "ant.h"
 
+SDL_Rect Ant::mSpriteClips[ANT_WALK_FRAMES];
+LTexture Ant::mSpriteSheetTexture;
+
 Ant::~Ant()
 {
 }

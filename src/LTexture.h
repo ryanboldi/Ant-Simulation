@@ -8,17 +8,17 @@
 #include <string>
 
 //screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+extern const int SCREEN_WIDTH;
+extern const int SCREEN_HEIGHT;
 
 //the window we will be rendering to
-SDL_Window *gWindow = NULL;
+extern SDL_Window *gWindow;
 
 //the window renderer
-SDL_Renderer *gRenderer = NULL;
+extern SDL_Renderer *gRenderer;
 
 //the global font
-TTF_Font *gFont = NULL;
+extern TTF_Font *gFont;
 
 // texture wrapper class
 class LTexture

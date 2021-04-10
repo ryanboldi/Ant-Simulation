@@ -1,8 +1,11 @@
-#include "ant.h"
-
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <stdio.h>
 #include <string>
 #include <cmath>
+
+#include "ant.h"
 
 //starts up SDL and create the window
 bool init();
@@ -190,32 +193,32 @@ int main(int argc, char *args[])
                     {
                         quit = true;
                     }
-                    //on keypress change the rgb values
-                    else if (e.type == SDL_KEYDOWN)
-                    {
-                        switch (e.key.keysym.sym)
-                        {
-                        case SDLK_a:
-                            degrees -= 60;
-                            break;
+                    // //on keypress change the rgb values
+                    // else if (e.type == SDL_KEYDOWN)
+                    // {
+                    //     switch (e.key.keysym.sym)
+                    //     {
+                    //     case SDLK_a:
+                    //         degrees -= 60;
+                    //         break;
 
-                        case SDLK_d:
-                            degrees += 60;
-                            break;
+                    //     case SDLK_d:
+                    //         degrees += 60;
+                    //         break;
 
-                        case SDLK_q:
-                            flipType = SDL_FLIP_HORIZONTAL;
-                            break;
+                    //     case SDLK_q:
+                    //         flipType = SDL_FLIP_HORIZONTAL;
+                    //         break;
 
-                        case SDLK_w:
-                            flipType = SDL_FLIP_NONE;
-                            break;
+                    //     case SDLK_w:
+                    //         flipType = SDL_FLIP_NONE;
+                    //         break;
 
-                        case SDLK_e:
-                            flipType = SDL_FLIP_VERTICAL;
-                            break;
-                        }
-                    }
+                    //     case SDLK_e:
+                    //         flipType = SDL_FLIP_VERTICAL;
+                    //         break;
+                    //     }
+                    // }
                 }
 
                 //Clear the screen

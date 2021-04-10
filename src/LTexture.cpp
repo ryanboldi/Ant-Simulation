@@ -2,6 +2,19 @@
 #include <string>
 #include <cmath>
 
+//screen dimension constants
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
+
+//the window we will be rendering to
+SDL_Window *gWindow = NULL;
+
+//the window renderer
+SDL_Renderer *gRenderer = NULL;
+
+//the global font
+TTF_Font *gFont = NULL;
+
 LTexture::LTexture()
 {
     //initialize
