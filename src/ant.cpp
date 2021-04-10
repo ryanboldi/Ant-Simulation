@@ -4,41 +4,53 @@ Ant::~Ant()
 {
 }
 
-static void loadSprites(SDL_Rect spriteClipArray[ANT_WALK_FRAMES])
+bool Ant::loadSprites()
 {
-    LTexture antSpriteSheetTexture;
+    bool success = true;
 
     //load Ant Texture
-    if (!antSpriteSheetTexture.loadFromFile("assets/ant/ant-walk.png"))
+    if (!mSpriteSheetTexture.loadFromFile("assets/ant/ant-walk.png"))
     {
         printf("Failed to load ant Image! \n");
+        success = false;
     }
     else
     {
         //set ant 1
-        spriteClipArray[0].x = 0;
-        spriteClipArray[0].y = 0;
-        spriteClipArray[0].w = 64;
-        spriteClipArray[0].h = 64;
+        mSpriteClips[0].x = 0;
+        mSpriteClips[0].y = 0;
+        mSpriteClips[0].w = 64;
+        mSpriteClips[0].h = 64;
 
         //set ant 2
-        spriteClipArray[1].x = 64;
-        spriteClipArray[1].y = 0;
-        spriteClipArray[1].w = 64;
-        spriteClipArray[1].h = 64;
+        mSpriteClips[1].x = 64;
+        mSpriteClips[1].y = 0;
+        mSpriteClips[1].w = 64;
+        mSpriteClips[1].h = 64;
 
         //set ant 3
-        spriteClipArray[2].x = 128;
-        spriteClipArray[2].y = 0;
-        spriteClipArray[2].w = 64;
-        spriteClipArray[2].h = 64;
+        mSpriteClips[2].x = 128;
+        mSpriteClips[2].y = 0;
+        mSpriteClips[2].w = 64;
+        mSpriteClips[2].h = 64;
 
         //set ant 4
-        spriteClipArray[3].x = 192;
-        spriteClipArray[3].y = 0;
-        spriteClipArray[3].w = 64;
-        spriteClipArray[3].h = 64;
+        mSpriteClips[3].x = 192;
+        mSpriteClips[3].y = 0;
+        mSpriteClips[3].w = 64;
+        mSpriteClips[3].h = 64;
 
-        antSpriteSheetTexture.setBlendMode(SDL_BLENDMODE_BLEND);
+        mSpriteSheetTexture.setBlendMode(SDL_BLENDMODE_BLEND);
     }
+
+    return success;
+}
+
+void Ant::render(SDL_Renderer *renderer, int frame)
+{
+    //render the current frame
+    SDL_Rect *currentClip = &mSpriteClips[frame / 4];
+    mSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2,
+                               (SCREEN_HEIGHT - currentClip->h) / 2,
+                               currentClip, angle, NULL, SDL_FLIP_NONE);
 }

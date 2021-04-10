@@ -11,7 +11,8 @@ private:
     float x, y;
     float angle;
     unsigned short int scale = 1;
-    static SDL_Rect gSprintClips[ANT_WALK_FRAMES];
+    static SDL_Rect mSpriteClips[ANT_WALK_FRAMES];
+    static LTexture mSpriteSheetTexture;
 
 public:
     // constructor
@@ -21,15 +22,15 @@ public:
                                                                            angle(angle){};
     ~Ant();
 
-    static void loadSprites(SDL_Rect spriteClipArray[ANT_WALK_FRAMES]);
+    static bool loadSprites();
 
-    //getters
-    float get_x();
-    float get_y();
-    float get_angle();
+    // //getters
+    // float get_x();
+    // float get_y();
+    // float get_angle();
 
     //render
-    void render(SDL_Renderer *renderer);
+    void render(SDL_Renderer *renderer, int frame);
 };
 
 #endif

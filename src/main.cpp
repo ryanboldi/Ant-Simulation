@@ -4,10 +4,6 @@
 #include <string>
 #include <cmath>
 
-//screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
-
 //starts up SDL and create the window
 bool init();
 
@@ -22,12 +18,7 @@ SDL_Texture *loadTexture(std::string path);
 
 //Scene textures
 LTexture gTextTexture;
-LTexture gAntTexture;
 LTexture gBackgroundTexture;
-
-//scene sprites
-SDL_Rect gSpriteClips[ANT_WALK_FRAMES];
-LTexture gSpriteSheetTexture;
 
 bool init()
 {
@@ -113,7 +104,10 @@ bool loadMedia()
         }
     }
 
-    Ant::loadSprites(gSpriteClips);
+    if (!Ant::loadSprites())
+    {
+        success = false;
+    }
 
     if (!gBackgroundTexture.loadFromFile("assets/background.png"))
     {
@@ -129,7 +123,6 @@ void close()
 
     //free loaded images
     gTextTexture.free();
-    gAntTexture.free();
     gBackgroundTexture.free();
 
     //free the global font
@@ -230,15 +223,7 @@ int main(int argc, char *args[])
                 SDL_RenderClear(gRenderer);
 
                 //modulate the texture's color a bit
-                //gBackgroundTexture.setColor(0, 0, 0);
                 gBackgroundTexture.render(0, 0);
-
-                //set all the ants to have an alpha that we can modulate
-                gSpriteSheetTexture.setAlpha(a);
-
-                //render the current frame
-                SDL_Rect *currentClip = &gSpriteClips[frame / 4];
-                gSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, currentClip, degrees, NULL, flipType);
 
                 //render text
                 gTextTexture.render((SCREEN_WIDTH - gTextTexture.getWidth()) / 2, (SCREEN_HEIGHT - gTextTexture.getHeight()) / 2);
