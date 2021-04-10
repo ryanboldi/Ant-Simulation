@@ -1,6 +1,5 @@
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDl_ttf.h>
+#include "ant.h"
+
 #include <stdio.h>
 #include <string>
 #include <cmath>
@@ -8,50 +7,6 @@
 //screen dimension constants
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
-
-//texture wrapper class
-class LTexture
-{
-public:
-    //initializes variables
-    LTexture();
-
-    //Deallocates memory
-    ~LTexture();
-
-    //loads image at specified path
-    bool loadFromFile(std::string path);
-
-    //creates an image from font string
-    bool loadFromRenderedText(std::string textureText, SDL_Color textColor);
-
-    //set color modulation
-    void setColor(Uint8 red, Uint8 green, Uint8 blue);
-
-    //set blending
-    void setBlendMode(SDL_BlendMode blending);
-
-    //set alpha modulation
-    void setAlpha(Uint8 alpha);
-
-    //deallocate texture
-    void free();
-
-    //renders texture at given point
-    void render(int x, int y, SDL_Rect *clip = NULL, double angle = 0.0, SDL_Point *center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
-
-    //get image dimensions
-    int getWidth();
-    int getHeight();
-
-private:
-    //the actual hardware texture
-    SDL_Texture *mTexture;
-
-    //Image dimensions
-    int mWidth;
-    int mHeight;
-};
 
 //starts up SDL and create the window
 bool init();
@@ -65,169 +20,14 @@ void close();
 //Loads individual image as texture
 SDL_Texture *loadTexture(std::string path);
 
-//the window we will be rendering to
-SDL_Window *gWindow = NULL;
-
-//the window renderer
-SDL_Renderer *gRenderer = NULL;
-
-//the global font
-TTF_Font *gFont = NULL;
-
 //Scene textures
 LTexture gTextTexture;
 LTexture gAntTexture;
 LTexture gBackgroundTexture;
 
 //scene sprites
-const int antWalkFrames = 4;
-SDL_Rect gSpriteClips[antWalkFrames];
+SDL_Rect gSpriteClips[ANT_WALK_FRAMES];
 LTexture gSpriteSheetTexture;
-
-LTexture::LTexture()
-{
-    //initialize
-    mTexture = NULL;
-    mWidth = 0;
-    mHeight = 0;
-}
-
-LTexture::~LTexture()
-{
-    //deallocate
-    free();
-}
-
-bool LTexture::loadFromFile(std::string path)
-{
-    //get rid of preexisting texture
-    free();
-
-    //the final texture
-    SDL_Texture *newTexture = NULL;
-
-    //load image at specified path
-    SDL_Surface *loadedSurface = IMG_Load(path.c_str());
-    if (loadedSurface == NULL)
-    {
-        printf("Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError());
-    }
-    else
-    {
-
-        //color key the image
-        //SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGBA(loadedSurface->format, 0xFF, 0xFF, 0xFF));
-
-        //create new texture from surface pixels
-        newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
-        if (newTexture == NULL)
-        {
-            printf("Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
-        }
-        else
-        {
-            //get image dimensions
-            mWidth = loadedSurface->w;
-            mHeight = loadedSurface->h;
-        }
-
-        //get rid of old loaded surface
-        SDL_FreeSurface(loadedSurface);
-    }
-
-    //return success
-    mTexture = newTexture;
-    return mTexture != NULL;
-}
-
-bool LTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor)
-{
-    //get rid of preexisting texture
-    free();
-
-    //Render text surface
-    SDL_Surface *textSurface = TTF_RenderText_Solid(gFont, textureText.c_str(), textColor);
-    if (textSurface == NULL)
-    {
-        printf("unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
-    }
-    else
-    {
-        //create texture from surface pixels
-        mTexture = SDL_CreateTextureFromSurface(gRenderer, textSurface);
-        if (mTexture == NULL)
-        {
-            printf("unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
-        }
-        else
-        {
-            //get image dimensions
-            mWidth = textSurface->w;
-            mHeight = textSurface->h;
-        }
-
-        //get rid of old surface
-        SDL_FreeSurface(textSurface);
-    }
-
-    //return success
-    return mTexture != NULL;
-}
-
-void LTexture::setColor(Uint8 red, Uint8 green, Uint8 blue)
-{
-    //modulate texture
-    SDL_SetTextureColorMod(mTexture, red, green, blue);
-}
-
-void LTexture::setBlendMode(SDL_BlendMode blending)
-{
-    SDL_SetTextureBlendMode(mTexture, blending);
-}
-
-void LTexture::setAlpha(Uint8 alpha)
-{
-    //modulate the texture's alpha
-    SDL_SetTextureAlphaMod(mTexture, alpha);
-}
-
-void LTexture::free()
-{
-    //free texture if it exists
-    if (mTexture != NULL)
-    {
-        SDL_DestroyTexture(mTexture);
-        mTexture = NULL;
-        mWidth = 0;
-        mHeight = 0;
-    }
-}
-
-void LTexture::render(int x, int y, SDL_Rect *clip, double angle, SDL_Point *center, SDL_RendererFlip flip)
-{
-
-    //set rendering sapce and render to screen
-    SDL_Rect renderQuad = {x, y, mWidth, mHeight};
-
-    //set clip rendering dimensions
-    if (clip != NULL)
-    {
-        renderQuad.w = clip->w;
-        renderQuad.h = clip->h;
-    }
-
-    SDL_RenderCopyEx(gRenderer, mTexture, clip, &renderQuad, angle, center, flip);
-}
-
-int LTexture::getWidth()
-{
-    return mWidth;
-}
-
-int LTexture::getHeight()
-{
-    return mHeight;
-}
 
 bool init()
 {
@@ -313,40 +113,7 @@ bool loadMedia()
         }
     }
 
-    //load Ant Texture
-    if (!gSpriteSheetTexture.loadFromFile("assets/ant/ant-walk.png"))
-    {
-        printf("Failed to load ant Image! \n");
-        success = false;
-    }
-    else
-    {
-        //set ant 1
-        gSpriteClips[0].x = 0;
-        gSpriteClips[0].y = 0;
-        gSpriteClips[0].w = 64;
-        gSpriteClips[0].h = 64;
-
-        //set ant 2
-        gSpriteClips[1].x = 64;
-        gSpriteClips[1].y = 0;
-        gSpriteClips[1].w = 64;
-        gSpriteClips[1].h = 64;
-
-        //set ant 3
-        gSpriteClips[2].x = 128;
-        gSpriteClips[2].y = 0;
-        gSpriteClips[2].w = 64;
-        gSpriteClips[2].h = 64;
-
-        //set ant 5
-        gSpriteClips[3].x = 192;
-        gSpriteClips[3].y = 0;
-        gSpriteClips[3].w = 64;
-        gSpriteClips[3].h = 64;
-
-        gSpriteSheetTexture.setBlendMode(SDL_BLENDMODE_BLEND);
-    }
+    Ant::loadSprites(gSpriteClips);
 
     if (!gBackgroundTexture.loadFromFile("assets/background.png"))
     {
@@ -483,7 +250,7 @@ int main(int argc, char *args[])
                 ++frame;
 
                 //cycle the animation
-                if (frame / 4 >= antWalkFrames)
+                if (frame / 4 >= ANT_WALK_FRAMES)
                 {
                     frame = 0;
                 }

@@ -1,7 +1,7 @@
 #ifndef ANT_H
 #define ANT_H
 
-#include <SDL.h>
+#include "LTexture.h"
 
 #define ANT_WALK_FRAMES 4
 
@@ -21,11 +21,10 @@ public:
                                                                            angle(angle){};
     ~Ant();
 
-    static SDL_Rect loadSprites();
+    static void loadSprites(SDL_Rect spriteClipArray[ANT_WALK_FRAMES]);
 
     //getters
-    float
-    get_x();
+    float get_x();
     float get_y();
     float get_angle();
 
