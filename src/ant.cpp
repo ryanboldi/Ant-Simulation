@@ -53,7 +53,7 @@ void Ant::render(SDL_Renderer *renderer, int frame)
 {
     //render the current frame
     SDL_Rect *currentClip = &mSpriteClips[frame / 4];
-    mSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2,
-                               (SCREEN_HEIGHT - currentClip->h) / 2,
+    mSpriteSheetTexture.render(x,
+                               y,
                                currentClip, angle, NULL, SDL_FLIP_NONE);
 }
