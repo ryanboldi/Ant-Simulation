@@ -33,8 +33,11 @@ public:
     //loads image at specified path
     bool loadFromFile(std::string path);
 
+//only load ttf if we need it
+#if defined(SDL_TTF_MAJOR_VERSION)
     //creates an image from font string
     bool loadFromRenderedText(std::string textureText, SDL_Color textColor);
+#endif
 
     //set color modulation
     void setColor(Uint8 red, Uint8 green, Uint8 blue);
