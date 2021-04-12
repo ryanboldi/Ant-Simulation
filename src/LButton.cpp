@@ -73,5 +73,5 @@ void LButton::handleEvent(SDL_Event *e)
 void LButton::render()
 {
     //show the current button sprite
-    gButtonSpriteSheetTexture.render(mPosition.x, mPosition.y, &gSpriteClips[mCurrentSprite]);
+    gButtonSpriteSheetTexture.render(mPosition.x, mPosition.y, &gButtonClips[mCurrentSprite]);
 }

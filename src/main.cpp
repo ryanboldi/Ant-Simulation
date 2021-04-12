@@ -6,6 +6,8 @@
 #include <cmath>
 
 #include "ant.h"
+#include "LTexture.h"
+#include "LButton.h"
 
 //starts up SDL and create the window
 bool init();
@@ -22,6 +24,11 @@ SDL_Texture *loadTexture(std::string path);
 //Scene textures
 LTexture gTextTexture;
 LTexture gBackgroundTexture;
+
+LTexture gButtonSpriteSheetTexture;
+SDL_Rect gButtonClips[BUTTON_SPRITE_TOTAL];
+
+LButton gButtons[TOTAL_BUTTONS];
 
 bool init()
 {
@@ -102,9 +109,31 @@ bool loadMedia()
         SDL_Color textColor = {0, 0, 0};
         if (!gTextTexture.loadFromRenderedText("Ant ant ant ant", textColor))
         {
-            printf("Failed to render text texutre!\n Ryan_Error 0001");
+            printf("Failed to render text texutre! Ryan_Error 0001 \n");
             success = false;
         }
+    }
+
+    //load button sprites
+    if (!gButtonSpriteSheetTexture.loadFromFile("assets/button.png"))
+    {
+        printf("Failed to load button sprite texture! Ryan_Error 0002 \n");
+        success = false;
+    }
+    else
+    {
+        for (int i = 0; i < BUTTON_SPRITE_TOTAL; ++i)
+        {
+            gButtonClips[i].x = 0;
+            gButtonClips[i].y = i * 200;
+            gButtonClips[i].w = BUTTON_WIDTH;
+            gButtonClips[i].h = BUTTON_HEIGHT;
+        }
+
+        gButtons[0].setPosition(0, 0);
+        gButtons[1].setPosition(SCREEN_WIDTH - BUTTON_WIDTH, 0);
+        gButtons[2].setPosition(0, SCREEN_HEIGHT - BUTTON_HEIGHT);
+        gButtons[3].setPosition(SCREEN_WIDTH - BUTTON_WIDTH, SCREEN_HEIGHT - BUTTON_HEIGHT);
     }
 
     if (!Ant::loadSprites())
@@ -193,6 +222,12 @@ int main(int argc, char *args[])
                     {
                         quit = true;
                     }
+
+                    //handle button events
+                    for (int i = 0; i < TOTAL_BUTTONS; ++i)
+                    {
+                        gButtons[i].handleEvent(&e);
+                    }
                 }
 
                 //Clear the screen
@@ -203,7 +238,13 @@ int main(int argc, char *args[])
                 gBackgroundTexture.render(0, 0);
 
                 //render text
-                gTextTexture.render((SCREEN_WIDTH - gTextTexture.getWidth()) / 2, (SCREEN_HEIGHT - gTextTexture.getHeight()) / 2);
+                //gTextTexture.render((SCREEN_WIDTH - gTextTexture.getWidth()) / 2, (SCREEN_HEIGHT - gTextTexture.getHeight()) / 2);
+
+                //render buttons
+                for (int i = 0; i < TOTAL_BUTTONS; ++i)
+                {
+                    gButtons[i].render();
+                }
 
                 //update screen
                 SDL_RenderPresent(gRenderer);

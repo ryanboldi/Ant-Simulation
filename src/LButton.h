@@ -2,10 +2,11 @@
 #define LBUTTON_H
 
 #include <SDL.h>
+#include "LTexture.h"
 
 //button constants
-const int BUTTON_WIDTH = 100;
-const int BUTTON_HEIGHT = 50;
+const int BUTTON_WIDTH = 150;
+const int BUTTON_HEIGHT = 100;
 const int TOTAL_BUTTONS = 4;
 
 enum LButtonSprite
@@ -16,6 +17,9 @@ enum LButtonSprite
     BUTTON_SPRITE_MOUSE_UP = 3,
     BUTTON_SPRITE_TOTAL = 4
 };
+
+extern LTexture gButtonSpriteSheetTexture;
+extern SDL_Rect gButtonClips[BUTTON_SPRITE_TOTAL];
 
 class LButton
 {
@@ -38,6 +42,6 @@ private:
 
     //currently used global sprite
     LButtonSprite mCurrentSprite;
-}
+};
 
 #endif
