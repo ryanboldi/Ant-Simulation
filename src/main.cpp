@@ -194,6 +194,9 @@ int main(int argc, char *args[])
             //SDL event handler
             SDL_Event e;
 
+            //current texture being used for keyboard testing TODELETE
+            LTexture *currentTexture = NULL;
+
             //current animation frame
             int frame = 0;
 
@@ -222,12 +225,29 @@ int main(int argc, char *args[])
                     {
                         quit = true;
                     }
+                }
 
-                    //handle button events
-                    for (int i = 0; i < TOTAL_BUTTONS; ++i)
-                    {
-                        gButtons[i].handleEvent(&e);
-                    }
+                //sets texture based on current keystate
+                const Uint8 *currentKeyStates = SDL_GetKeyboardState(NULL);
+                if (currentKeyStates[SDL_SCANCODE_UP])
+                {
+                    printf("up key pressed");
+                }
+                else if (currentKeyStates[SDL_SCANCODE_DOWN])
+                {
+                    printf("down key pressed");
+                }
+                else if (currentKeyStates[SDL_SCANCODE_LEFT])
+                {
+                    printf("left key pressd");
+                }
+                else if (currentKeyStates[SDL_SCANCODE_RIGHT])
+                {
+                    printf("right key pressed");
+                }
+                else
+                {
+                    printf("no key pressed");
                 }
 
                 //Clear the screen
@@ -236,15 +256,6 @@ int main(int argc, char *args[])
 
                 //modulate the texture's color a bit
                 gBackgroundTexture.render(0, 0);
-
-                //render text
-                //gTextTexture.render((SCREEN_WIDTH - gTextTexture.getWidth()) / 2, (SCREEN_HEIGHT - gTextTexture.getHeight()) / 2);
-
-                //render buttons
-                for (int i = 0; i < TOTAL_BUTTONS; ++i)
-                {
-                    gButtons[i].render();
-                }
 
                 //update screen
                 SDL_RenderPresent(gRenderer);
